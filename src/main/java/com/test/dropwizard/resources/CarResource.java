@@ -2,22 +2,27 @@ package com.test.dropwizard.resources;
 
 import static com.test.dropwizard.resources.ResourcesConstants.PATH_CAR;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.dropwizard.core.Car;
 import com.test.dropwizard.db.CarDAO;
 import com.test.dropwizard.views.CarView;
 
 import io.dropwizard.hibernate.UnitOfWork;
+
 
 @Path(PATH_CAR)
 public class CarResource {
@@ -52,19 +57,27 @@ public class CarResource {
 	}
 	
 	@POST
-	@Produces(MediaType.TEXT_HTML)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@UnitOfWork
-	public CarView save(Form carForm) {
-		MultivaluedMap<String, String> carFormMap = carForm.asMap();
-		carFormMap.forEach( (k,v) -> {
-			System.out.println("**** key: " + k);
-			System.out.println("**** value: " + v);
-		});
-		ObjectMapper mapper = new ObjectMapper();
-		Car car = mapper.convertValue(carFormMap, Car.class);
-		carDAO.create(car);
-		return getCars();
+	public Response save(
+			@FormParam(Car.PROPERTY_NAME) String name,
+			@FormParam(Car.PROPERTY_KILOMETERS) Float kilometers,
+			@FormParam(Car.PROPERTY_APPEARANCE_COLOR) String appearanceColor,
+			@FormParam(Car.PROPERTY_APPEARANCE_PAINTING) String appearancePainting
+			) throws URISyntaxException {
+		Car newCar = new Car(name, kilometers, appearanceColor, appearancePainting);
+		newCar = carDAO.create(newCar);
+		URI location = UriBuilder.fromUri("/cars").build();
+		return Response.seeOther(location).build();
+	}
+	
+	@DELETE
+	@Path("/{id}")
+	@UnitOfWork
+	public Response delete(@PathParam(Car.PROPERTY_ID) Long id) {
+		carDAO.delete(id);
+		URI location = UriBuilder.fromUri("/cars").build();
+		return Response.seeOther(location).build();
 	}
 
 }

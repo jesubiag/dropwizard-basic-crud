@@ -14,7 +14,12 @@ import org.hibernate.annotations.CascadeType;
 public class Car implements Serializable {
 	
 	private static final long serialVersionUID = -4805124311615672037L;
-
+	public static final String PROPERTY_ID = "id";
+	public static final String PROPERTY_NAME = "name";
+	public static final String PROPERTY_KILOMETERS = "kilometers";
+	public static final String PROPERTY_APPEARANCE_COLOR = "appearance.color";
+	public static final String PROPERTY_APPEARANCE_PAINTING = "appearance.painting";
+	
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -33,6 +38,14 @@ public class Car implements Serializable {
 		this.name = name;
 		this.kilometers = kilometers;
 		this.appearance = appearance;
+	}
+	
+	public Car(String name, Float kilometers, String appearanceColor, String appearancePainting) {
+		this.name= name;
+		this.kilometers = kilometers;
+		CarAppearanceHealth health = null;
+		CarAppearance carAppearance = new CarAppearance(this, appearanceColor, appearancePainting, health);
+		this.appearance = carAppearance;
 	}
 
 	public Long getId() {

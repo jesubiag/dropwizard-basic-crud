@@ -25,5 +25,10 @@ public class CarDAO extends AbstractDAO<Car> {
 	public List<Car> findAll() {
 		return list(criteria());
 	}
+	
+	public void delete(Long id) {
+		Car car = findById(id);
+		currentSession().delete(car);
+	}
 
 }
